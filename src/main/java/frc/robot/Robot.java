@@ -56,6 +56,7 @@ public class Robot extends TimedRobot {
     m_rightRearMotor.setInverted(true);
     m_rightFrontMotor.setInverted(true);
 
+    pcm.enableCompressorDigital();
 
   }
 
