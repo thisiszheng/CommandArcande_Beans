@@ -5,8 +5,15 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PneumaticsControlModule;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -16,6 +23,23 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
+
+  private final Talon m_leftRearMotor = new Talon(1);
+  private final Talon m_leftFrontMotor = new Talon(2);
+  private final Talon m_rightRearMotor = new Talon(4);
+  private final Talon m_rightFrontMotor = new Talon(3);
+
+  private final MotorControllerGroup m_leftMotor = new MotorControllerGroup(m_leftRearMotor, m_leftFrontMotor);
+
+  private final MotorControllerGroup m_rightMotor = new MotorControllerGroup(m_rightRearMotor, m_rightFrontMotor);
+  
+  private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
+
+  private final Joystick m_stick = new Joystick(0);
+  private final Joystick m_rightStick = new Joystick(0);
+
+  private PneumaticsControlModule pcm = new PneumaticsControlModule(1);
+  private DoubleSolenoid ds = pcm.makeDoubleSolenoid(0, 7);
 
   private RobotContainer m_robotContainer;
 
@@ -28,6 +52,11 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    m_rightRearMotor.setInverted(true);
+    m_rightFrontMotor.setInverted(true);
+
+
   }
 
   /**
@@ -81,7 +110,16 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+
+    m_robotDrive.arcadeDrive(-m_stick.getY(), -m_rightStick.getZ());
+
+    if(m_stick.getRawButton(2)){
+      ds.set(Value.kForward);
+    }else if(m_stick.getRawButton(3)){
+      ds.set(Value.kReverse);
+    }
+  }
 
   @Override
   public void testInit() {
